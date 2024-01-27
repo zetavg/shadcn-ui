@@ -11,6 +11,11 @@ import { HttpsProxyAgent } from "https-proxy-agent"
 import fetch from "node-fetch"
 import * as z from "zod"
 
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+import fs from 'fs';
+
 const baseUrl = process.env.COMPONENTS_REGISTRY_URL ?? "https://ui.shadcn.com"
 const agent = process.env.https_proxy
   ? new HttpsProxyAgent(process.env.https_proxy)
@@ -139,11 +144,9 @@ export async function getItemTargetPath(
 async function fetchRegistry(paths: string[]) {
   try {
     const results = await Promise.all(
-      paths.map(async (path) => {
-        const response = await fetch(`${baseUrl}/registry/${path}`, {
-          agent,
-        })
-        return await response.json()
+      paths.map(async (p) => {
+        const jsonFileContent = fs.readFileSync(path.resolve(__dirname, `../../../apps/www/public/registry/${p}`), 'utf8')
+        return JSON.parse(jsonFileContent)
       })
     )
 
